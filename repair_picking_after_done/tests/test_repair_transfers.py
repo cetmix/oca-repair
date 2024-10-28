@@ -55,7 +55,6 @@ class TestRepairTransfer(TransactionCase):
         self.repair_r2.write({"lot_id": lot_id.id, "product_id": product_with_lot.id})
 
     def test_repair_transfer_1(self):
-
         # Validate the repair order
         self.repair_r1.action_validate()
         self.assertEqual(self.repair_r1.state, "confirmed")
@@ -78,7 +77,6 @@ class TestRepairTransfer(TransactionCase):
         self.assertEqual(len(self.repair_r1.picking_ids), 1)
 
     def test_repair_transfer_2(self):
-
         # Validate the repair order
         self.repair_r2.action_validate()
         self.assertEqual(self.repair_r2.state, "confirmed")
