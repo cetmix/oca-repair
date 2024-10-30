@@ -5,54 +5,56 @@ from odoo.tests.common import TransactionCase
 
 
 class TestRepairTransfer(TransactionCase):
-    def setUp(self, *args, **kwargs):
-        super(TestRepairTransfer, self).setUp(*args, **kwargs)
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
-        # First of all we create a repair to work with
-        self.repair_r1 = self.env.ref("repair.repair_r1")
-        self.repair_r2 = self.env.ref("repair.repair_r1")
+        # Create unique repair orders
+        cls.repair_r1 = cls.env.ref("repair.repair_r1").copy()
+        cls.repair_r2 = cls.env.ref("repair.repair_r2").copy()
 
         # Now we will create a destination location
-        self.stock_location_destination = self.env["stock.location"].create(
+        cls.stock_location_destination = cls.env["stock.location"].create(
             {"name": "Destination Locations", "usage": "internal"}
         )
 
-        # Let's add some stock
-        self.env["stock.quant"].create(
+        # Let's add some stock for repair_r1
+        cls.env["stock.quant"].create(
             {
-                "product_id": self.repair_r1.product_id.id,
-                "location_id": self.repair_r1.location_id.id,
+                "product_id": cls.repair_r1.product_id.id,
+                "location_id": cls.repair_r1.location_id.id,
                 "quantity": 1.0,
             }
         )
 
         # Create a product with lot/serial tracking
-        product_with_lot = self.env["product.product"].create(
+        product_with_lot = cls.env["product.product"].create(
             {
                 "name": "Product with lot tracking",
                 "type": "product",
                 "tracking": "lot",
                 "list_price": 10.0,
-                "categ_id": self.env.ref("product.product_category_all").id,
+                "categ_id": cls.env.ref("product.product_category_all").id,
             }
         )
-        lot_id = self.env["stock.lot"].create(
+        lot_id = cls.env["stock.lot"].create(
             {
                 "name": "LOT0001",
                 "product_id": product_with_lot.id,
-                "company_id": self.env.company.id,
+                "company_id": cls.env.company.id,
             }
         )
-        # Let's add some stock
-        self.env["stock.quant"].create(
+
+        # Add stock for repair_r2
+        cls.env["stock.quant"].create(
             {
                 "product_id": product_with_lot.id,
                 "lot_id": lot_id.id,
-                "location_id": self.repair_r2.location_id.id,
+                "location_id": cls.repair_r2.location_id.id,
                 "quantity": 1.0,
             }
         )
-        self.repair_r2.write({"lot_id": lot_id.id, "product_id": product_with_lot.id})
+        cls.repair_r2.write({"lot_id": lot_id.id, "product_id": product_with_lot.id})
 
     def test_repair_transfer_1(self):
         # Validate the repair order
