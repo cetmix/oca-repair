@@ -1,6 +1,7 @@
 # Copyright (C) 2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
+from odoo.exceptions import UserError
 from odoo.tests.common import TransactionCase
 
 
@@ -9,26 +10,8 @@ class TestRepairTransfer(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        # Create unique repair orders
-        cls.repair_r1 = cls.env.ref("repair.repair_r1").copy()
-        cls.repair_r2 = cls.env.ref("repair.repair_r2").copy()
-
-        # Now we will create a destination location
-        cls.stock_location_destination = cls.env["stock.location"].create(
-            {"name": "Destination Locations", "usage": "internal"}
-        )
-
-        # Let's add some stock for repair_r1
-        cls.env["stock.quant"].create(
-            {
-                "product_id": cls.repair_r1.product_id.id,
-                "location_id": cls.repair_r1.location_id.id,
-                "quantity": 1.0,
-            }
-        )
-
         # Create a product with lot/serial tracking
-        product_with_lot = cls.env["product.product"].create(
+        cls.product_with_lot = cls.env["product.product"].create(
             {
                 "name": "Product with lot tracking",
                 "type": "product",
@@ -37,69 +20,122 @@ class TestRepairTransfer(TransactionCase):
                 "categ_id": cls.env.ref("product.product_category_all").id,
             }
         )
-        lot_id = cls.env["stock.lot"].create(
+        cls.lot_id = cls.env["stock.lot"].create(
             {
                 "name": "LOT0001",
-                "product_id": product_with_lot.id,
+                "product_id": cls.product_with_lot.id,
                 "company_id": cls.env.company.id,
             }
         )
 
-        # Add stock for repair_r2
-        cls.env["stock.quant"].create(
+        # Create unique repair orders
+        cls.repair_r1 = cls.env["repair.order"].create(
             {
-                "product_id": product_with_lot.id,
-                "lot_id": lot_id.id,
-                "location_id": cls.repair_r2.location_id.id,
-                "quantity": 1.0,
+                "product_id": cls.product_with_lot.id,
+                "location_id": cls.env.ref("stock.stock_location_stock").id,
+                "lot_id": cls.lot_id.id,
+                "product_qty": 5.0,
             }
         )
-        cls.repair_r2.write({"lot_id": lot_id.id, "product_id": product_with_lot.id})
+        cls.repair_r2 = cls.env["repair.order"].create(
+            {
+                "product_id": cls.product_with_lot.id,
+                "location_id": cls.env.ref("stock.stock_location_stock").id,
+                "lot_id": cls.lot_id.id,
+                "product_qty": 1.0,
+            }
+        )
 
-    def test_repair_transfer_1(self):
-        # Validate the repair order
-        self.repair_r1.action_validate()
-        self.assertEqual(self.repair_r1.state, "confirmed")
+        # Create a destination location
+        cls.stock_location_destination = cls.env["stock.location"].create(
+            {"name": "Destination Locations", "usage": "internal"}
+        )
 
-        self.repair_r1.action_repair_start()
-        self.assertEqual(self.repair_r1.state, "under_repair")
+        # Add stock for repair orders
+        cls.env["stock.quant"].create(
+            {
+                "product_id": cls.product_with_lot.id,
+                "lot_id": cls.lot_id.id,
+                "location_id": cls.repair_r1.location_id.id,
+                "quantity": 5.0,
+            }
+        )
 
-        self.repair_r1.action_repair_end()
-        self.assertEqual(self.repair_r1.state, "done")
+    def setUpRepairOrder(self, repair_order):
+        # Validate and set the state of the repair order
+        repair_order.action_validate()
+        self.assertEqual(repair_order.state, "confirmed")
+        repair_order.action_repair_start()
+        self.assertEqual(repair_order.state, "under_repair")
+        repair_order.action_repair_end()
+        self.assertEqual(repair_order.state, "done")
 
+    def createTransfer(self, repair_order, quantity):
+        # Create and execute a transfer wizard
         transfer_repair_wizard = self.env["repair.move.transfer"].create(
             {
-                "repair_order_id": self.repair_r1.id,
-                "quantity": 1.0,
+                "repair_order_id": repair_order.id,
+                "quantity": quantity,
                 "location_dest_id": self.stock_location_destination.id,
+                "remaining_quantity": repair_order.remaining_quantity,
             }
         )
         transfer_repair_wizard.action_create_transfer()
 
+    def test_repair_transfer_1(self):
+        self.setUpRepairOrder(self.repair_r1)
+        self.createTransfer(self.repair_r1, 1.0)
         self.assertEqual(len(self.repair_r1.picking_ids), 1)
 
     def test_repair_transfer_2(self):
-        # Validate the repair order
-        self.repair_r2.action_validate()
-        self.assertEqual(self.repair_r2.state, "confirmed")
-
-        self.repair_r2.action_repair_start()
-        self.assertEqual(self.repair_r2.state, "under_repair")
-
-        self.repair_r2.action_repair_end()
-        self.assertEqual(self.repair_r2.state, "done")
-
-        transfer_repair_wizard = self.env["repair.move.transfer"].create(
-            {
-                "repair_order_id": self.repair_r2.id,
-                "quantity": 1.0,
-                "location_dest_id": self.stock_location_destination.id,
-            }
-        )
-        transfer_repair_wizard.action_create_transfer()
+        self.setUpRepairOrder(self.repair_r2)
+        self.createTransfer(self.repair_r2, 1.0)
         self.assertEqual(len(self.repair_r2.picking_ids), 1)
 
         move_line = self.repair_r2.picking_ids.mapped("move_ids").mapped(
             "move_line_ids"
         )[0]
         self.assertEqual(move_line.lot_id.name, "LOT0001")
+
+    def test_multiple_transfers(self):
+        self.setUpRepairOrder(self.repair_r1)
+
+        # Attempt to create a transfer for 0 items.
+        with self.assertRaises(
+            UserError, msg="Quantity to transfer must be greater than 0."
+        ):
+            self.createTransfer(self.repair_r1, 0.0)
+
+        # Create the first transfer for 1 item
+        self.createTransfer(self.repair_r1, 1.0)
+
+        # Update remaining quantity after first transfer
+        self.repair_r1._compute_remaining_quantity()
+
+        # Create the second transfer for 2 items
+        self.createTransfer(self.repair_r1, 2.0)
+
+        # Update remaining quantity after second transfer
+        self.repair_r1._compute_remaining_quantity()
+
+        # Attempt to create a third transfer for 3 items,
+        # which exceeds the remaining quantity (which is now 2)
+        with self.assertRaises(
+            UserError,
+            msg="Quantity to transfer cannot exceed the remaining "
+            "quantity in the repair order.",
+        ):
+            self.createTransfer(self.repair_r1, 3.0)
+
+        # Check the number of pickings created
+        self.assertEqual(len(self.repair_r1.picking_ids), 2)
+
+        # Check the total quantity transferred
+        total_transferred = sum(
+            qty
+            for picking in self.repair_r1.picking_ids
+            for qty in picking.move_ids.mapped("product_uom_qty")
+        )
+        self.assertEqual(
+            total_transferred, 3.0, "Total transferred quantity should equal to 3.0"
+        )

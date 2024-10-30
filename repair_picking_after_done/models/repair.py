@@ -34,6 +34,7 @@ class Repair(models.Model):
             "context": {
                 "default_repair_order_id": self.id,
                 "default_quantity": self.remaining_quantity,
+                "default_remaining_quantity": self.remaining_quantity,
             },
             "target": "new",
         }

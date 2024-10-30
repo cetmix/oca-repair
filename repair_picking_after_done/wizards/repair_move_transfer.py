@@ -17,6 +17,7 @@ class MrpInventoryProcure(models.TransientModel):
         "stock.location", string="Destination location", required=True
     )
     quantity = fields.Float("Quantity to transfer", required=True)
+    remaining_quantity = fields.Float("Remaining Quantity to Transfer")
 
     def _get_picking_type(self):
         self.ensure_one()
@@ -62,6 +63,22 @@ class MrpInventoryProcure(models.TransientModel):
             <= 0
         ):
             raise UserError(_("Quantity to transfer must be greater than 0."))
+
+        if (
+            float_compare(
+                self.quantity,
+                self.repair_order_id.remaining_quantity,
+                precision_rounding=self.repair_order_id.product_id.uom_id.rounding,
+            )
+            > 0
+        ):
+            raise UserError(
+                _(
+                    "Quantity to transfer cannot exceed the remaining "
+                    "quantity in the repair order."
+                )
+            )
+
         picking = self.env["stock.picking"].create(self._prepare_picking_vals())
         stock_move = self.env["stock.move"].create(
             self._prepare_stock_move_vals(picking)
