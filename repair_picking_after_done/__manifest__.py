@@ -18,4 +18,5 @@
     "development_status": "Alpha",
     "license": "AGPL-3",
     "application": False,
+    "post_load": "post_load_hook",
 }
