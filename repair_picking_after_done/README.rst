@@ -28,8 +28,15 @@ Repair picking after done
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module adds the functionality to create transfer of repaired move
-once repair order is done.
+This module enhances Odoo's repair process by introducing automatic
+stock transfers for repaired products.
+
+-  **Automatic Transfer:** When a repair order is marked as done, a
+   stock transfer for the remaining repaired products is automatically
+   created and validated if the **auto_transfer_repair** parameter is
+   enabled.
+-  **Manual Transfer:** Users can manually create stock transfers when
+   automatic transfer is disabled.
 
 .. IMPORTANT::
    This is an alpha version, the data model and design can change at any time without warning.
@@ -44,14 +51,32 @@ once repair order is done.
 Configuration
 =============
 
-No configuration needed for this module.
+To enable automatic transfers for repaired products when a repair order
+is completed:
+
+-  Navigate to Repairs → Configuration → Settings.
+-  Enable the **Automatic Transfer on Repair Completion** setting.
+
+When enabled, internal transfers for repaired products are automatically
+created and validated upon completing the repair order.
 
 Usage
 =====
 
-After repair order is done, You will be able to see button "Transfer" on
-repair order's form view. You will be able to create internal transfer
-between repair location to any destination location.
+**Manual Transfers**
+
+1. After a repair order is marked as **Done**, a **Create Transfer**
+   button will appear on the repair order's form view.
+2. Click the Create Transfer button to create an internal transfer for
+   the repaired products.
+3. Specify the destination location and quantity to complete the
+   transfer.
+
+**Automatic Transfers**
+
+1. If the **auto_transfer_repair** configuration parameter is enabled,
+   an internal transfer is automatically created and validated when the
+   repair order is marked as **Done**.
 
 Known issues / Roadmap
 ======================

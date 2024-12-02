@@ -1,7 +1,8 @@
 # Copyright (C) 2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import fields, models
+from odoo import _, fields, models
+from odoo.exceptions import ValidationError
 
 
 class Repair(models.Model):
@@ -35,6 +36,47 @@ class Repair(models.Model):
                 "default_repair_order_id": self.id,
                 "default_quantity": self.remaining_quantity,
                 "default_remaining_quantity": self.remaining_quantity,
+                "default_location_dest_id": self.product_location_dest_id.id,
             },
             "target": "new",
         }
+
+    def _get_auto_transfer_value(self):
+        return (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("repair.auto_transfer_repair", default=False)
+        )
+
+    def action_validate(self):
+        auto_transfer = self._get_auto_transfer_value()
+
+        if auto_transfer and not self.product_id:
+            raise ValidationError(
+                _(
+                    "Automatic transfer cannot be completed because "
+                    "no product is specified for this repair order. "
+                    "Please ensure that a product is assigned to the "
+                    "repair order before proceeding with the transfer."
+                )
+            )
+
+        return super().action_validate()
+
+    def action_repair_done(self):
+        super().action_repair_done()
+
+        auto_transfer = self._get_auto_transfer_value()
+        if auto_transfer:
+            for repair in self:
+                if repair.remaining_quantity > 0:
+                    transfer_wizard = self.env["repair.move.transfer"].create(
+                        {
+                            "repair_order_id": repair.id,
+                            "location_dest_id": repair.product_location_dest_id.id,
+                            "quantity": repair.remaining_quantity,
+                        }
+                    )
+                    transfer_wizard.action_create_transfer()
+                    repair.picking_ids.button_validate()
+        return True

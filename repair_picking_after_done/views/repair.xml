@@ -11,7 +11,7 @@
                     name="action_transfer_done_moves"
                     string="Create Transfer"
                     type="object"
-                    invisible="state != 'done' or remaining_quantity == 0"
+                    invisible="state != 'done' or remaining_quantity == 0 or not product_id"
                 />
             </header>
         </field>

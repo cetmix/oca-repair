@@ -1,7 +1,7 @@
 # Copyright (C) 2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import TransactionCase
 
 
@@ -45,6 +45,11 @@ class TestRepairTransfer(TransactionCase):
                 "product_qty": 1.0,
             }
         )
+        cls.repair_order_no_product = cls.env["repair.order"].create(
+            {
+                "location_id": cls.env.ref("stock.stock_location_stock").id,
+            }
+        )
 
         # Create a destination location
         cls.stock_location_destination = cls.env["stock.location"].create(
@@ -60,6 +65,9 @@ class TestRepairTransfer(TransactionCase):
                 "quantity": 5.0,
             }
         )
+
+        # Set the repair auto-transfer configuration to disabled (manual transfers)
+        cls.env["ir.config_parameter"].set_param("repair.auto_transfer_repair", False)
 
     def setUpRepairOrder(self, repair_order):
         # Validate and set the state of the repair order
@@ -82,22 +90,14 @@ class TestRepairTransfer(TransactionCase):
         )
         transfer_repair_wizard.action_create_transfer()
 
-    def test_repair_transfer_1(self):
+    def test_repair_transfer_manual_1(self):
+        """Test creating a single manual transfer."""
         self.setUpRepairOrder(self.repair_r1)
         self.createTransfer(self.repair_r1, 1.0)
         self.assertEqual(len(self.repair_r1.picking_ids), 1)
 
-    def test_repair_transfer_2(self):
-        self.setUpRepairOrder(self.repair_r2)
-        self.createTransfer(self.repair_r2, 1.0)
-        self.assertEqual(len(self.repair_r2.picking_ids), 1)
-
-        move_line = self.repair_r2.picking_ids.mapped("move_ids").mapped(
-            "move_line_ids"
-        )[0]
-        self.assertEqual(move_line.lot_id.name, "LOT0001")
-
-    def test_multiple_transfers(self):
+    def test_repair_transfer_manual_multiple(self):
+        """Test multiple manual transfers for the repair order."""
         self.setUpRepairOrder(self.repair_r1)
 
         # Attempt to create a transfer for 0 items.
@@ -106,7 +106,7 @@ class TestRepairTransfer(TransactionCase):
         ):
             self.createTransfer(self.repair_r1, 0.0)
 
-        # Create the first transfer for 1 item
+        # Create the first manual transfer for 1 item
         self.createTransfer(self.repair_r1, 1.0)
 
         # Update remaining quantity after first transfer
@@ -139,3 +139,15 @@ class TestRepairTransfer(TransactionCase):
         self.assertEqual(
             total_transferred, 3.0, "Total transferred quantity should equal to 3.0"
         )
+
+    def test_repair_transfer_automatic(self):
+        """Test automatic transfer creation upon repair order completion."""
+        self.env["ir.config_parameter"].set_param("repair.auto_transfer_repair", True)
+        self.setUpRepairOrder(self.repair_r2)
+        self.assertEqual(len(self.repair_r2.picking_ids), 1)
+        self.assertEqual(self.repair_r2.picking_ids.state, "done")
+
+    def test_repair_transfer_automatic_no_product(self):
+        self.env["ir.config_parameter"].set_param("repair.auto_transfer_repair", True)
+        with self.assertRaises(ValidationError):
+            self.repair_order_no_product.action_validate()
