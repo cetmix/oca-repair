@@ -1,7 +1,7 @@
 # Copyright 2024 Antoni Marroig(APSL-Nagarro)<amarroig@apsl.net>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import _, fields, models
+from odoo import fields, models
 
 
 class RepairOrder(models.Model):
@@ -21,7 +21,7 @@ class RepairOrder(models.Model):
         action["view_mode"] = "form"
         action["views"] = [(False, "form")]
         action["target"] = "current"
-        action["name"] = _("Create Inspection")
+        action["name"] = self.env._("Create Inspection")
 
         action["context"] = {
             "default_qty": self.product_qty,
@@ -36,7 +36,7 @@ class RepairOrder(models.Model):
         return {
             "name": "Inspections from " + self.name,
             "type": "ir.actions.act_window",
-            "view_mode": "tree,form",
+            "view_mode": "list,form",
             "res_model": "qc.inspection",
             "domain": [("id", "in", self.inspection_ids.ids)],
         }

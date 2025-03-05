@@ -3,7 +3,7 @@
 {
     "name": "Repair Quality Control",
     "summary": "Create quality controls from repair order",
-    "version": "17.0.1.0.0",
+    "version": "18.0.1.0.0",
     "category": "Repair",
     "website": "https://github.com/OCA/repair",
     "author": "Antoni Marroig, Odoo Community Association (OCA)",
