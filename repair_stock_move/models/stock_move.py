@@ -62,6 +62,10 @@ class StockMove(models.Model):
         )
         if self.repair_line_id and self.repair_line_id.lot_id:
             vals["lot_id"] = self.repair_line_id.lot_id.id
-        elif self.repair_id and self.repair_id.lot_id:
+        elif (
+            self.repair_id
+            and self.repair_id.lot_id
+            and self.product_id == self.repair_id.product_id
+        ):
             vals["lot_id"] = self.repair_id.lot_id.id
         return vals
