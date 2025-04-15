@@ -22,6 +22,7 @@ Available addons
 addon | version | maintainers | summary
 --- | --- | --- | ---
 [repair_calendar_view](repair_calendar_view/) | 16.0.1.0.0 |  | Repair Calendar View
+[repair_comment_template](repair_comment_template/) | 16.0.1.0.0 | [![cubells](https://github.com/cubells.png?size=30px)](https://github.com/cubells) | Comments templates on Repair documents
 [repair_discount](repair_discount/) | 16.0.1.0.0 |  | Repair Discount
 [repair_picking_after_done](repair_picking_after_done/) | 16.0.1.0.2 |  | Transfer repaired move to another location directly from repaire order
 [repair_purchase_return](repair_purchase_return/) | 16.0.1.0.1 | [![JordiBForgeFlow](https://github.com/JordiBForgeFlow.png?size=30px)](https://github.com/JordiBForgeFlow) | Create a Purchase Return from a Repair
