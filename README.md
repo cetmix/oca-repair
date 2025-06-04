@@ -22,21 +22,21 @@ Available addons
 addon | version | maintainers | summary
 --- | --- | --- | ---
 [repair_calendar_view](repair_calendar_view/) | 16.0.1.0.0 |  | Repair Calendar View
-[repair_comment_template](repair_comment_template/) | 16.0.1.0.0 | [![cubells](https://github.com/cubells.png?size=30px)](https://github.com/cubells) | Comments templates on Repair documents
+[repair_comment_template](repair_comment_template/) | 16.0.1.0.0 | <a href='https://github.com/cubells'><img src='https://github.com/cubells.png' width='32' height='32' style='border-radius:50%;' alt='cubells'/></a> | Comments templates on Repair documents
 [repair_discount](repair_discount/) | 16.0.1.0.0 |  | Repair Discount
 [repair_picking_after_done](repair_picking_after_done/) | 16.0.1.0.2 |  | Transfer repaired move to another location directly from repaire order
-[repair_purchase_return](repair_purchase_return/) | 16.0.1.0.1 | [![JordiBForgeFlow](https://github.com/JordiBForgeFlow.png?size=30px)](https://github.com/JordiBForgeFlow) | Create a Purchase Return from a Repair
-[repair_quality_control](repair_quality_control/) | 16.0.1.0.0 | [![peluko00](https://github.com/peluko00.png?size=30px)](https://github.com/peluko00) | Create quality controls from repair order
+[repair_purchase_return](repair_purchase_return/) | 16.0.1.0.1 | <a href='https://github.com/JordiBForgeFlow'><img src='https://github.com/JordiBForgeFlow.png' width='32' height='32' style='border-radius:50%;' alt='JordiBForgeFlow'/></a> | Create a Purchase Return from a Repair
+[repair_quality_control](repair_quality_control/) | 16.0.1.0.0 | <a href='https://github.com/peluko00'><img src='https://github.com/peluko00.png' width='32' height='32' style='border-radius:50%;' alt='peluko00'/></a> | Create quality controls from repair order
 [repair_reason](repair_reason/) | 16.0.1.0.0 |  | Repair Reason
 [repair_refurbish](repair_refurbish/) | 16.0.1.0.0 |  | Create refurbished products during repair
 [repair_reinvoice](repair_reinvoice/) | 16.0.1.0.0 |  | Repair Reinvoice in odoo
-[repair_sale_order](repair_sale_order/) | 16.0.1.0.1 | [![ChrisOForgeFlow](https://github.com/ChrisOForgeFlow.png?size=30px)](https://github.com/ChrisOForgeFlow) | Repair To Sale Order
+[repair_sale_order](repair_sale_order/) | 16.0.1.0.1 | <a href='https://github.com/ChrisOForgeFlow'><img src='https://github.com/ChrisOForgeFlow.png' width='32' height='32' style='border-radius:50%;' alt='ChrisOForgeFlow'/></a> | Repair To Sale Order
 [repair_security](repair_security/) | 16.0.1.0.0 |  | Create security groups for Repair
 [repair_stock](repair_stock/) | 16.0.1.0.0 |  | Repair Stock
 [repair_stock_move](repair_stock_move/) | 16.0.1.1.0 |  | Ongoing Repair Stock Moves Definition in odoo
 [repair_type](repair_type/) | 16.0.1.0.2 |  | Repair type
 [repair_type_refurbish](repair_type_refurbish/) | 16.0.1.0.0 |  | Repair type
-[repair_type_sequence](repair_type_sequence/) | 16.0.1.0.0 | [![AaronHForgeFlow](https://github.com/AaronHForgeFlow.png?size=30px)](https://github.com/AaronHForgeFlow) | Adds sequence to repair orders defined in the repairs's type
+[repair_type_sequence](repair_type_sequence/) | 16.0.1.0.0 | <a href='https://github.com/AaronHForgeFlow'><img src='https://github.com/AaronHForgeFlow.png' width='32' height='32' style='border-radius:50%;' alt='AaronHForgeFlow'/></a> | Adds sequence to repair orders defined in the repairs's type
 
 [//]: # (end addons)
 
