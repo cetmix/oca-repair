@@ -24,15 +24,15 @@ addon | version | maintainers | summary
 [repair_reason](repair_reason/) | 15.0.1.0.0 |  | Repair Reason
 [repair_refurbish](repair_refurbish/) | 15.0.1.0.3 |  | Create refurbished products during repair
 [repair_refurbish_repair_stock_move](repair_refurbish_repair_stock_move/) | 15.0.1.0.1 |  | Use refurbish and repair stock moves together
-[repair_sale_order](repair_sale_order/) | 15.0.1.0.0 | [![ChrisOForgeFlow](https://github.com/ChrisOForgeFlow.png?size=30px)](https://github.com/ChrisOForgeFlow) | Repair To Sale Order
+[repair_sale_order](repair_sale_order/) | 15.0.1.0.0 | <a href='https://github.com/ChrisOForgeFlow'><img src='https://github.com/ChrisOForgeFlow.png' width='32' height='32' style='border-radius:50%;' alt='ChrisOForgeFlow'/></a> | Repair To Sale Order
 [repair_scrap](repair_scrap/) | 15.0.1.1.0 |  | To send to scrap components or irreparable components.
 [repair_security](repair_security/) | 15.0.1.0.0 |  | Create security groups for Repair
 [repair_stock_move](repair_stock_move/) | 15.0.1.1.2 |  | Ongoing Repair Stock Moves Definition in odoo
-[repair_stock_move_restrict_lot](repair_stock_move_restrict_lot/) | 15.0.1.0.0 | [![AaronHForgeFlow](https://github.com/AaronHForgeFlow.png?size=30px)](https://github.com/AaronHForgeFlow) | Glue module to restrict lot in stock moves of repair orders
+[repair_stock_move_restrict_lot](repair_stock_move_restrict_lot/) | 15.0.1.0.0 | <a href='https://github.com/AaronHForgeFlow'><img src='https://github.com/AaronHForgeFlow.png' width='32' height='32' style='border-radius:50%;' alt='AaronHForgeFlow'/></a> | Glue module to restrict lot in stock moves of repair orders
 [repair_type](repair_type/) | 15.0.1.0.0 |  | Repair type
 [repair_type_refurbish](repair_type_refurbish/) | 15.0.1.0.0 |  | Repair type
 [repair_type_security](repair_type_security/) | 15.0.1.0.0 |  | Glue module Repair Type and Repair Security
-[repair_type_sequence](repair_type_sequence/) | 15.0.1.0.2 | [![AaronHForgeFlow](https://github.com/AaronHForgeFlow.png?size=30px)](https://github.com/AaronHForgeFlow) | Adds sequence to repair orders defined in the repairs's type
+[repair_type_sequence](repair_type_sequence/) | 15.0.1.0.2 | <a href='https://github.com/AaronHForgeFlow'><img src='https://github.com/AaronHForgeFlow.png' width='32' height='32' style='border-radius:50%;' alt='AaronHForgeFlow'/></a> | Adds sequence to repair orders defined in the repairs's type
 
 [//]: # (end addons)
 
