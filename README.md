@@ -21,7 +21,7 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
-[repair_type](repair_type/) | 18.0.1.0.0 |  | Repair type
+[repair_type](repair_type/) | 18.0.1.0.1 |  | Repair type
 
 [//]: # (end addons)
 
