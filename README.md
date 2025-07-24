@@ -21,7 +21,7 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
-[repair_service](repair_service/) | 18.0.1.0.0 |  | Adds services to repair orders, so that they can be added as sale order lines.
+[repair_service](repair_service/) | 18.0.1.0.1 |  | Adds services to repair orders, so that they can be added as sale order lines.
 [repair_type](repair_type/) | 18.0.1.0.1 |  | Repair type
 
 [//]: # (end addons)
