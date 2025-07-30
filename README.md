@@ -26,7 +26,7 @@ addon | version | maintainers | summary
 [repair_picking](repair_picking/) | 17.0.1.0.0 |  | Enhanced repair order management with pickings for adding and removing components
 [repair_picking_after_done](repair_picking_after_done/) | 17.0.1.1.0 |  | Transfer repaired move to another location directly from repair order
 [repair_quality_control](repair_quality_control/) | 17.0.1.0.0 | <a href='https://github.com/peluko00'><img src='https://github.com/peluko00.png' width='32' height='32' style='border-radius:50%;' alt='peluko00'/></a> | Create quality controls from repair order
-[repair_quotation_manual_sync](repair_quotation_manual_sync/) | 17.0.1.0.0 |  | Manually Synchronize Repair Orders with their Quotations
+[repair_quotation_manual_sync](repair_quotation_manual_sync/) | 17.0.1.0.1 |  | Manually Synchronize Repair Orders with their Quotations
 [repair_refurbish](repair_refurbish/) | 17.0.2.0.0 |  | Create refurbished products during repair
 [repair_restrict_lot](repair_restrict_lot/) | 17.0.1.0.0 |  | Repair Restrict Lot
 [repair_service](repair_service/) | 17.0.1.0.0 |  | Adds services to repair orders, so that they can be added as sale order lines.
