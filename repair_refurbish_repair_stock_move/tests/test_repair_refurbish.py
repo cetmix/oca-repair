@@ -138,3 +138,39 @@ class TestMrpMtoWithStock(TransactionCase):
             ]
         )
         self.assertEqual(moves.lot_id, existing_lot_refurbish)
+
+    def test_03_change_refurbish_product_when_repairing(self):
+        # Create the repair with to_refurbish=True from the beginning
+        repair = self.repair_obj.create(
+            {
+                "product_id": self.product.id,
+                "product_qty": 3.0,
+                "product_uom": self.product.uom_id.id,
+                "location_dest_id": self.customer_location.id,
+                "location_id": self.stock_location_stock.id,
+                "to_refurbish": True,
+                "refurbish_product_id": self.refurbish_product.id,
+                "refurbish_location_dest_id": self.customer_location.id,
+            }
+        )
+        repair.action_validate()
+        repair.action_repair_start()
+
+        # Now change refurbish_product_id
+        another_refurbish_product = self.product_obj.create(
+            {"name": "Refurbished Screen 2", "type": "product"}
+        )
+        repair.write(
+            {
+                "refurbish_product_id": another_refurbish_product.id,
+            }
+        )
+        repair.action_repair_end()
+        moves = self.move_line_obj.search(
+            [
+                ("move_id.reference", "=", repair.name),
+                ("state", "!=", "cancel"),
+                ("product_id", "=", another_refurbish_product.id),
+            ]
+        )
+        self.assertEqual(len(moves), 1)
