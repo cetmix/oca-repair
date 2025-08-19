@@ -24,7 +24,10 @@ class RepairOrder(models.Model):
     def write(self, values):
         res = super().write(values)
         for repair in self:
-            if "to_refurbish" in values.keys():
+            if (
+                "to_refurbish" in values.keys()
+                or "refurbish_product_id" in values.keys()
+            ):
                 if repair.mapped("stock_move_ids") and repair.state not in (
                     "draft",
                     "done",
