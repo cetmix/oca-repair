@@ -1,0 +1,1 @@
+In the repair order drag & drop lines in the "Parts" tab.
