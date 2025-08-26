@@ -8,6 +8,7 @@
     "website": "https://github.com/OCA/repair",
     "author": "Cetmix, Odoo Community Association (OCA)",
     "license": "AGPL-3",
+    "category": "Manufacturing/Repair",
     "depends": ["repair"],
     "data": [
         "views/repair_order_views.xml",

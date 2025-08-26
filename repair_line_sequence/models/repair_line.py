@@ -25,8 +25,9 @@ class RepairLine(models.Model):
 
         for repair_id, idxs in per_repair.items():
             last = self.search(
-                [("repair_id", "=", repair_id)], order="sequence desc", limit=1
+                [("repair_id", "=", repair_id)], order="sequence desc, id desc", limit=1
             )
+
             next_seq = (last.sequence or 0) + 10
             for i in idxs:
                 vals_list[i]["sequence"] = next_seq

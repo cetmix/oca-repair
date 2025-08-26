@@ -19,3 +19,9 @@ def post_init_hook(cr, registry):
          WHERE rl.id = ranked.id
         """
     )
+
+    # Helpful index for ordering/filtering within a repair
+    cr.execute(
+        "CREATE INDEX IF NOT EXISTS repair_line_repair_id_sequence_idx "
+        "ON repair_line (repair_id, sequence)"
+    )
