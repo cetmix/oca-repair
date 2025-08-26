@@ -1,5 +1,4 @@
 # Copyright Cetmix OU 2025
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from . import models
-from .hooks import post_init_hook
+from . import test_repair_line_sequence
