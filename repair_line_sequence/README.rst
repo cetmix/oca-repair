@@ -28,8 +28,8 @@ Repair Line Sequence
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module allows to change the line order in repair orders by adding a
-drag & drop widget in the form view.
+This module allows you to change the line order in repair orders by
+adding a drag-and-drop widget in the form view.
 
 **Table of contents**
 
@@ -39,14 +39,14 @@ drag & drop widget in the form view.
 Use Cases / Context
 ===================
 
-Sometimes there may be a need to change the order of the lines in the
-repair order. For example you would like to arrange them in accordance
-with how the parts are be used in the repair.
+Sometimes you may need to change the order of lines in a repair
+order—for example, to arrange them in accordance with how the parts will
+be used during the repair.
 
 Usage
 =====
 
-In the repair order drag & drop lines in the "Parts" tab.
+In the repair order, drag and drop lines in the "Parts" tab.
 
 Bug Tracker
 ===========
@@ -69,7 +69,9 @@ Authors
 Contributors
 ------------
 
-Cetmix <cetmix.com> Ivan Sokolov Andrei Loukachov
+- Cetmix https://cetmix.com
+- Ivan Sokolov
+- Andrei Loukachov
 
 Maintainers
 -----------

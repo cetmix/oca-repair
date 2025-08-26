@@ -1,3 +1,3 @@
-Cetmix <cetmix.com>
-	Ivan Sokolov
-	Andrei Loukachov
+- Cetmix <https://cetmix.com>
+- Ivan Sokolov
+- Andrei Loukachov
