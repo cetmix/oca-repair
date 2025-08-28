@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="view_repair_order_form_inherit_sequence" model="ir.ui.view">
-        <field name="name">repair.order.form.sequence</field>
-        <field name="model">repair.order</field>
-        <!-- canonical external id in v17 -->
-        <field name="inherit_id" ref="repair.view_repair_order_form" />
-        <field name="arch" type="xml">
-            <!-- target operations tree directly -->
-            <xpath expr="//field[@name='operations']/tree" position="attributes">
-                <attribute name="editable">bottom</attribute>
-                <attribute name="default_order">sequence asc, id asc</attribute>
-            </xpath>
+  <record id="view_repair_order_form_inherit_sequence" model="ir.ui.view">
+    <field name="name">repair.order.form.sequence</field>
+    <field name="model">repair.order</field>
+    <field name="inherit_id" ref="repair.view_repair_order_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='operations']/tree" position="attributes">
+        <attribute name="editable">bottom</attribute>
+        <attribute name="default_order">sequence asc, id asc</attribute>
+      </xpath>
 
-            <!-- put the handle as the first column -->
-            <xpath expr="//field[@name='operations']/tree/field[1]" position="before">
-                <field name="sequence" widget="handle" />
-            </xpath>
-        </field>
-    </record>
+      <xpath expr="//field[@name='operations']/tree/field[1]" position="before">
+        <field name="sequence" widget="handle" />
+      </xpath>
+    </field>
+  </record>
 </odoo>
