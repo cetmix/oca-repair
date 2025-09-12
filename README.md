@@ -22,6 +22,7 @@ Available addons
 addon | version | maintainers | summary
 --- | --- | --- | ---
 [base_repair_config](base_repair_config/) | 18.0.1.0.0 | <a href='https://github.com/marcelsavegnago'><img src='https://github.com/marcelsavegnago.png' width='32' height='32' style='border-radius:50%;' alt='marcelsavegnago'/></a> | Provides general settings for the Repair App
+[repair_quality_control](repair_quality_control/) | 18.0.1.0.0 | <a href='https://github.com/peluko00'><img src='https://github.com/peluko00.png' width='32' height='32' style='border-radius:50%;' alt='peluko00'/></a> | Create quality controls from repair order
 [repair_service](repair_service/) | 18.0.1.1.0 |  | Adds services to repair orders, so that they can be added as sale order lines.
 [repair_stock](repair_stock/) | 18.0.1.0.0 |  | Repair Stock
 [repair_type](repair_type/) | 18.0.1.0.1 |  | Repair type
