@@ -35,6 +35,10 @@ class RepairService(models.Model):
         "Quantity", digits="Product Unit of Measure", required=True, default=1.0
     )
     company_id = fields.Many2one(related="repair_id.company_id")
+    description = fields.Text(
+        string="Service Description",
+        help="Custom description that will be transferred to the sale order line.",
+    )
 
     @api.depends("product_id")
     def _compute_name(self):
@@ -54,6 +58,8 @@ class RepairService(models.Model):
             "product_uom_qty": product_qty,
             "product_uom": self.product_uom.id,
         }
+        if self.description:
+            vals["name"] = self.description
         if self.repair_id.under_warranty:
             vals["price_unit"] = 0.0
         elif self.product_id.lst_price:
