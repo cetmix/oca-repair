@@ -24,7 +24,7 @@ class RepairOrder(models.Model):
             if not vals.get("schedule_date"):
                 vals["schedule_date"] = fields.Datetime.now()
 
-            if not vals.get("planned_duration"):
+            if vals.get("planned_duration") == 1.0:
                 vals["planned_duration"] = float(
                     self.env["ir.config_parameter"]
                     .sudo()
