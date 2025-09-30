@@ -28,7 +28,7 @@ Scheduled Repair Calendar View
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module implements a calendar view for repair orders. The view Is
+This module implements a calendar view for repair orders. The view is
 based on the scheduled date. If you need to use calendar view based on
 the date when the order was done consider using the repair_calendar_view
 module instead.
@@ -53,14 +53,14 @@ To configure the default repair order planned duration:
 ::
 
    Go to "Repairs > Configuration > Settings".
-   Put the value using  the "hh:mm" in the "Default Planned Order Duration" field.
+   Put the value using the "hh:mm" in the "Default Planned Order Duration" field.
 
 Usage
 =====
 
 Use the calendar view to see the scheduled repair orders. You can
-specify duration of any specific order by modifying the "Planned
-Duration" field or by resizing the calendar element.
+specify the duration of any order by modifying the "Planned Duration"
+field or by resizing the calendar element.
 
 Bug Tracker
 ===========
