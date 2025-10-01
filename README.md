@@ -22,6 +22,7 @@ Available addons
 addon | version | maintainers | summary
 --- | --- | --- | ---
 [base_repair_config](base_repair_config/) | 17.0.1.0.0 | <a href='https://github.com/marcelsavegnago'><img src='https://github.com/marcelsavegnago.png' width='32' height='32' style='border-radius:50%;' alt='marcelsavegnago'/></a> | Provides general settings for the Repair App
+[repair_order_line_sequence](repair_order_line_sequence/) | 17.0.1.0.0 |  | Allow to change line order in repairs
 [repair_order_template](repair_order_template/) | 17.0.1.0.0 | <a href='https://github.com/ivantodorovich'><img src='https://github.com/ivantodorovich.png' width='32' height='32' style='border-radius:50%;' alt='ivantodorovich'/></a> | Use templates to save time when creating repair orders
 [repair_picking](repair_picking/) | 17.0.1.0.0 |  | Enhanced repair order management with pickings for adding and removing components
 [repair_picking_after_done](repair_picking_after_done/) | 17.0.1.1.0 |  | Transfer repaired move to another location directly from repair order
