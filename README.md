@@ -25,7 +25,7 @@ addon | version | maintainers | summary
 [partner_repair_button](partner_repair_button/) | 18.0.1.0.0 | <a href='https://github.com/AaronHForgeFlow'><img src='https://github.com/AaronHForgeFlow.png' width='32' height='32' style='border-radius:50%;' alt='AaronHForgeFlow'/></a> | Partner Repair Smart Button
 [repair_order_line_sequence](repair_order_line_sequence/) | 18.0.1.0.0 |  | Allow to change line order in repairs
 [repair_quality_control](repair_quality_control/) | 18.0.1.0.0 | <a href='https://github.com/peluko00'><img src='https://github.com/peluko00.png' width='32' height='32' style='border-radius:50%;' alt='peluko00'/></a> | Create quality controls from repair order
-[repair_service](repair_service/) | 18.0.1.2.1 |  | Adds services to repair orders, so that they can be added as sale order lines.
+[repair_service](repair_service/) | 18.0.1.2.2 |  | Adds services to repair orders, so that they can be added as sale order lines.
 [repair_stock](repair_stock/) | 18.0.1.0.0 |  | Repair Stock
 [repair_timesheet](repair_timesheet/) | 18.0.1.0.0 | <a href='https://github.com/ppyczko'><img src='https://github.com/ppyczko.png' width='32' height='32' style='border-radius:50%;' alt='ppyczko'/></a> | Repair Timesheet
 [repair_type](repair_type/) | 18.0.1.0.1 |  | Repair type
