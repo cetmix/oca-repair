@@ -659,3 +659,101 @@ class TestRepairOrderGroup(TransactionCase):
 
         repair.action_repair_cancel()
         self.assertEqual(repair.state, "cancel")
+
+    # ------------------------------------------------------------------ #
+    #  Tests for task 5417: configurable "Add Grouped Repair" visibility  #
+    # ------------------------------------------------------------------ #
+
+    PARAM_KEY = "repair_order_group.add_grouped_repair_states"
+
+    def _set_allowed_states(self, *states):
+        """Helper: write allowed state keys to ir.config_parameter."""
+        self.env["ir.config_parameter"].sudo().set_param(
+            self.PARAM_KEY, ",".join(states)
+        )
+
+    def test_22_button_visible_in_allowed_state_no_so(self):
+        """Button is visible when state is allowed and no SO exists."""
+        self._set_allowed_states("draft")
+        repair = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+            }
+        )
+        self.assertEqual(repair.state, "draft")
+        self.assertTrue(repair.show_add_grouped_repair)
+
+    def test_23_button_hidden_in_disallowed_state(self):
+        """Button is hidden when current state is not in allowed list."""
+        self._set_allowed_states("draft")
+        repair = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+            }
+        )
+        repair.action_validate()
+        repair._action_repair_confirm()
+        # state is now 'confirmed', not in allowed list
+        self.assertFalse(repair.show_add_grouped_repair)
+
+    def test_24_button_hidden_when_so_confirmed(self):
+        """Button is hidden regardless of state when SO is confirmed."""
+        self._set_allowed_states("draft", "confirmed", "under_repair")
+        repair = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+            }
+        )
+        sale_order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_order.action_confirm()  # state → 'sale'
+        repair.write({"sale_order_id": sale_order.id})
+        self.assertFalse(repair.show_add_grouped_repair)
+
+    def test_25_button_hidden_when_so_cancelled(self):
+        """Button is hidden when the related SO is cancelled."""
+        self._set_allowed_states("draft", "confirmed", "under_repair")
+        repair = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+            }
+        )
+        sale_order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_order.action_cancel()  # state → 'cancel'
+        repair.write({"sale_order_id": sale_order.id})
+        self.assertFalse(repair.show_add_grouped_repair)
+
+    def test_26_button_hidden_when_setting_empty(self):
+        """When no states are configured button is hidden everywhere."""
+        self._set_allowed_states()  # empty → deny all
+        repair = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+            }
+        )
+        self.assertFalse(repair.show_add_grouped_repair)
+
+    def test_27_button_visible_multiple_allowed_states(self):
+        """Button is visible when current state is one of several allowed."""
+        self._set_allowed_states("draft", "confirmed")
+        repair = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+            }
+        )
+        repair.action_validate()
+        repair._action_repair_confirm()
+        self.assertEqual(repair.state, "confirmed")
+        self.assertTrue(repair.show_add_grouped_repair)
+
+    def test_28_default_hook_sets_draft_state(self):
+        """post_init_hook sets 'draft' as the default allowed state."""
+        self._set_allowed_states()  # clear first
+        self.env["res.config.settings"]._set_default_add_grouped_repair_stages()
+        raw = self.env["ir.config_parameter"].sudo().get_param(self.PARAM_KEY, "")
+        self.assertIn("draft", raw.split(","))
