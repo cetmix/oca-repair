@@ -35,6 +35,31 @@ class RepairOrder(models.Model):
         help="All other repairs that belong to the same group.",
     )
 
+    show_add_grouped_repair = fields.Boolean(
+        compute="_compute_show_add_grouped_repair",
+        help="Controls visibility of the 'Add Grouped Repair' button. "
+        "True when the sale order is not confirmed/cancelled and "
+        "the current state is in the list configured in Settings.",
+    )
+
+    @api.depends("state", "sale_order_id.state")
+    def _compute_show_add_grouped_repair(self):
+        """Show button when SO is not confirmed and state is in allowed list.
+
+        Allowed states are configured in Repair → Configuration → Settings
+        as a comma-separated list of state keys (e.g. "draft,confirmed").
+        If no states are selected the button is hidden everywhere.
+        """
+        ICP = self.env["ir.config_parameter"].sudo()
+        raw = ICP.get_param("repair_order_group.add_grouped_repair_states", "")
+        allowed_states = {s.strip() for s in raw.split(",") if s.strip()}
+
+        for repair in self:
+            so_state = repair.sale_order_id.state if repair.sale_order_id else False
+            so_ok = so_state not in ("sale", "cancel")
+            state_ok = bool(allowed_states) and (repair.state in allowed_states)
+            repair.show_add_grouped_repair = so_ok and state_ok
+
     @api.depends("group_id", "group_id.repair_ids")
     def _compute_grouped_repair_ids(self):
         """Compute other repairs in the same group (excluding current repair)."""

@@ -14,7 +14,7 @@
                     class="btn-primary"
                     string="Add Grouped Repair"
                     help="Create a new repair linked to the same group and partner."
-                    invisible="state != 'draft'"
+                    invisible="not show_add_grouped_repair"
                 />
             </xpath>
             <!-- Tab with grouped repairs -->
