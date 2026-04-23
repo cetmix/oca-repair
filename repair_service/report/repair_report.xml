@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="report_repairorder_services" inherit_id="repair.report_repairorder">
+        <!--
+            Inherit the standard repair order report and append
+            a "Services" section after the existing content.
+        -->
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <t t-if="doc.repair_service_ids">
+                <div class="mt-4">
+                    <h2>Services</h2>
+                    <table class="table table-sm o_main_table">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Description</th>
+                                <th class="text-end">Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.repair_service_ids" t-as="service">
+                                <tr>
+                                    <td>
+                                        <span t-field="service.display_name" />
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="service.product_uom_qty" />
+                                        <span t-field="service.product_uom" />
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>
