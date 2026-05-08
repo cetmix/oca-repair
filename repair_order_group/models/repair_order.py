@@ -4,6 +4,8 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+from ..const import ADD_GROUPED_REPAIR_STATE_PARAMS, SALE_ORDER_BLOCKING_STATES
+
 
 class RepairOrder(models.Model):
     """Extend repair.order with grouping, cascade, and shared quotation logic.
@@ -42,23 +44,38 @@ class RepairOrder(models.Model):
         "the current state is in the list configured in Settings.",
     )
 
-    @api.depends("state", "sale_order_id.state")
-    def _compute_show_add_grouped_repair(self):
-        """Show button when SO is not confirmed and state is in allowed list.
+    def _get_allowed_grouped_repair_states(self):
+        """Return the set of repair states in which grouped repair is allowed.
 
-        Allowed states are configured in Repair → Configuration → Settings
-        as a comma-separated list of state keys (e.g. "draft,confirmed").
-        If no states are selected the button is hidden everywhere.
+        Reads each state's ir.config_parameter and returns those enabled.
+        An empty result means the button is hidden everywhere.
         """
         ICP = self.env["ir.config_parameter"].sudo()
-        raw = ICP.get_param("repair_order_group.add_grouped_repair_states", "")
-        allowed_states = {s.strip() for s in raw.split(",") if s.strip()}
+        return {
+            state
+            for state, param in ADD_GROUPED_REPAIR_STATE_PARAMS.items()
+            if ICP.get_param(param, False)
+        }
 
+    def _can_add_grouped_repair(self):
+        """Return True if this repair is eligible for grouped repair addition.
+
+        Business rule enforced both in the UI (invisible field) and on the
+        backend (action_add_another_repair guard):
+        - The related sale order must not be confirmed or cancelled.
+        - The current repair state must be in the configured allowed states.
+        """
+        self.ensure_one()
+        so_state = self.sale_order_id.state if self.sale_order_id else False
+        if so_state in SALE_ORDER_BLOCKING_STATES:
+            return False
+        allowed = self._get_allowed_grouped_repair_states()
+        return bool(allowed) and self.state in allowed
+
+    @api.depends("state", "sale_order_id.state")
+    def _compute_show_add_grouped_repair(self):
         for repair in self:
-            so_state = repair.sale_order_id.state if repair.sale_order_id else False
-            so_ok = so_state not in ("sale", "cancel")
-            state_ok = bool(allowed_states) and (repair.state in allowed_states)
-            repair.show_add_grouped_repair = so_ok and state_ok
+            repair.show_add_grouped_repair = repair._can_add_grouped_repair()
 
     @api.depends("group_id", "group_id.repair_ids")
     def _compute_grouped_repair_ids(self):
@@ -78,6 +95,13 @@ class RepairOrder(models.Model):
         partner, company, and locations, but not copy any parts or products.
         """
         self.ensure_one()
+        if not self._can_add_grouped_repair():
+            raise UserError(
+                _(
+                    "You cannot add a grouped repair in the current state "
+                    "or when the related sale order is already confirmed."
+                )
+            )
         if not self.group_id:
             self.group_id = self.env["repair.order.group"].create({})
 
@@ -208,7 +232,7 @@ class RepairOrder(models.Model):
         grouped = self.filtered(lambda r: r.group_id)
         ungrouped = self - grouped
 
-        # No groups at all → fallback to core logic
+        # No groups at all -> fallback to core logic
         if not grouped:
             return super().action_create_sale_order()
 

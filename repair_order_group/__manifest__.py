@@ -23,7 +23,6 @@
     "demo": [
         "demo/repair_order_group_demo.xml",
     ],
-    "post_init_hook": "_post_init_set_default_grouped_repair_stages",
     "installable": True,
     "application": False,
 }
