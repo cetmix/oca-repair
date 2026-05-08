@@ -17,6 +17,10 @@
                     invisible="not show_add_grouped_repair"
                 />
             </xpath>
+            <!-- Invisible field required for the invisible expression above -->
+            <xpath expr="//sheet" position="inside">
+                <field name="show_add_grouped_repair" invisible="True" />
+            </xpath>
             <!-- Tab with grouped repairs -->
             <xpath expr="//notebook" position="inside">
                 <page string="Grouped Repairs">
