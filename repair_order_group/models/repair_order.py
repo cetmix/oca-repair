@@ -1,10 +1,8 @@
 # Copyright (C) 2025 Cetmix OÜ
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
-
-from ..const import ADD_GROUPED_REPAIR_STATE_PARAMS, SALE_ORDER_BLOCKING_STATES
 
 
 class RepairOrder(models.Model):
@@ -39,40 +37,23 @@ class RepairOrder(models.Model):
 
     show_add_grouped_repair = fields.Boolean(
         compute="_compute_show_add_grouped_repair",
-        help="Controls visibility of the 'Add Grouped Repair' button. "
-        "True when the sale order is not confirmed/cancelled and "
-        "the current state is in the list configured in Settings.",
+        help="Technical field used to control the Add Grouped Repair button.",
     )
 
-    def _get_allowed_grouped_repair_states(self):
-        """Return the set of repair states in which grouped repair is allowed.
-
-        Reads each state's ir.config_parameter and returns those enabled.
-        An empty result means the button is hidden everywhere.
-        """
-        ICP = self.env["ir.config_parameter"].sudo()
-        return {
-            state
-            for state, param in ADD_GROUPED_REPAIR_STATE_PARAMS.items()
-            if ICP.get_param(param, False)
-        }
-
     def _can_add_grouped_repair(self):
-        """Return True if this repair is eligible for grouped repair addition.
-
-        Business rule enforced both in the UI (invisible field) and on the
-        backend (action_add_another_repair guard):
-        - The related sale order must not be confirmed or cancelled.
-        - The current repair state must be in the configured allowed states.
-        """
+        """Return True if this repair can be added to a repair group."""
         self.ensure_one()
-        so_state = self.sale_order_id.state if self.sale_order_id else False
-        if so_state in SALE_ORDER_BLOCKING_STATES:
-            return False
-        allowed = self._get_allowed_grouped_repair_states()
-        return bool(allowed) and self.state in allowed
+        allowed_states = set(
+            self.company_id.sudo().add_grouped_repair_state_ids.mapped("value")
+        )
+        return self.state in allowed_states and self.sale_order_id.state not in (
+            "sale",
+            "cancel",
+        )
 
-    @api.depends("state", "sale_order_id.state")
+    @api.depends(
+        "state", "sale_order_id.state", "company_id.add_grouped_repair_state_ids"
+    )
     def _compute_show_add_grouped_repair(self):
         for repair in self:
             repair.show_add_grouped_repair = repair._can_add_grouped_repair()
@@ -95,17 +76,19 @@ class RepairOrder(models.Model):
         partner, company, and locations, but not copy any parts or products.
         """
         self.ensure_one()
+
         if not self._can_add_grouped_repair():
             raise UserError(
-                _(
-                    "You cannot add a grouped repair in the current state "
-                    "or when the related sale order is already confirmed."
+                self.env._(
+                    "You cannot add a grouped repair in the current repair "
+                    "state or when the related sale order is confirmed "
+                    "or cancelled."
                 )
             )
+
         if not self.group_id:
             self.group_id = self.env["repair.order.group"].create({})
 
-        # Create new empty repair record within the same group
         new_repair = self.env["repair.order"].create(
             {
                 "group_id": self.group_id.id,
@@ -241,7 +224,7 @@ class RepairOrder(models.Model):
         if concerned:
             ref_str = "\n".join(concerned.mapped("name"))
             raise UserError(
-                _(
+                self.env._(
                     "You cannot create a quotation for a repair order that is "
                     "already linked to an existing sale order.\n"
                     "Concerned repair order(s):\n%(ref_str)s",
@@ -253,7 +236,7 @@ class RepairOrder(models.Model):
         if no_partner:
             ref_str = "\n".join(no_partner.mapped("name"))
             raise UserError(
-                _(
+                self.env._(
                     "You need to define a customer for a repair order in order to "
                     "create an associated quotation.\n"
                     "Concerned repair order(s):\n%(ref_str)s",

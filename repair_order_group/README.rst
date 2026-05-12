@@ -28,18 +28,27 @@ Repair Order Group
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module allows to group several repair orders, managing them in a
-more convenient way. Such orders are synchronised in the following
-actions:
+This module allows users to group several repair orders and manage them
+in a more convenient way.
 
-- Partner selection. When a partner is updated in one of the group
-  orders the same partner is set in all other orders of the same group.
-- Order confirmation. When one of the orders is confirmed all other
-  orders of the same group are confirmed.
-- Order cancellation. When one of the orders is cancelled all other
-  orders of the same group are cancelled.
-- Quotation creation. When a new quotation is created all orders of the
-  same group are added to the same quotation.
+Grouped repair orders are synchronized for the following actions:
+
+- **Partner selection**: when a partner is changed in one repair order,
+  the same partner is set on all other repair orders from the same
+  group.
+- **Order confirmation**: when one repair order is confirmed, all other
+  repair orders from the same group are confirmed as well.
+- **Order cancellation**: when one repair order is cancelled, all other
+  repair orders from the same group are cancelled as well.
+- **Quotation creation**: when a quotation is created, all repair orders
+  from the same group are added to the same quotation.
+
+The module also allows configuring the repair order states where the
+**Add Grouped Repair** button is available. This is configured with the
+**Available in** tags field in the Repair settings.
+
+The button is always hidden when the related sales order is confirmed or
+cancelled.
 
 **Table of contents**
 
@@ -63,9 +72,24 @@ order form.
 Usage
 =====
 
-Create the first repair order. Click the "Add Another Repair" button in
-the header. A new order will be created with the same partner and same
-order group.
+Create the first repair order.
+
+Click the **Add Grouped Repair** button in the header. A new repair
+order will be created with the same partner and the same repair order
+group.
+
+The availability of the **Add Grouped Repair** button can be configured
+from **Repair > Configuration > Settings** in the **Add Grouped Repair**
+setting.
+
+Use the **Available in** field to select the repair order states where
+the button should be available.
+
+By default, the button is available in the **New** repair order state.
+Additional states can be added in the **Available in** field.
+
+The button is always hidden when the related sales order is confirmed or
+cancelled.
 
 Bug Tracker
 ===========
@@ -92,6 +116,7 @@ Cetmix <cetmix.com>
 
 - Ivan Sokolov
 - Loukachov Andrei
+- Dmitry Meita
 
 Maintainers
 -----------
