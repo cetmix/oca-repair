@@ -3,24 +3,13 @@
 
 from odoo import fields, models
 
-from ..const import ADD_GROUPED_REPAIR_STATE_PARAMS
-
 
 class ResConfigSettings(models.TransientModel):
     """Add repair group settings to the Repair configuration page."""
 
     _inherit = "res.config.settings"
 
-    grouped_repair_state_draft = fields.Boolean(
-        string="New",
-        config_parameter=ADD_GROUPED_REPAIR_STATE_PARAMS["draft"],
-        default=True,
-    )
-    grouped_repair_state_confirmed = fields.Boolean(
-        string="Confirmed",
-        config_parameter=ADD_GROUPED_REPAIR_STATE_PARAMS["confirmed"],
-    )
-    grouped_repair_state_under_repair = fields.Boolean(
-        string="Under Repair",
-        config_parameter=ADD_GROUPED_REPAIR_STATE_PARAMS["under_repair"],
+    add_grouped_repair_state_ids = fields.Many2many(
+        related="company_id.add_grouped_repair_state_ids",
+        readonly=False,
     )

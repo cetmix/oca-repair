@@ -14,6 +14,7 @@
         "base_repair_config",
     ],
     "data": [
+        "data/res_company_data.xml",
         "data/repair_order_group_data.xml",
         "security/ir.model.access.csv",
         "views/repair_order_group_views.xml",

@@ -1,6 +1,6 @@
 # Copyright (C) 2025 Cetmix OÜ
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-
+from odoo import Command
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
@@ -14,8 +14,24 @@ class TestRepairOrderGroup(TransactionCase):
     def setUpClass(cls):
         """Set up test data."""
         super().setUpClass()
+        cls.env = cls.env(context=dict(cls.env.context, tracking_disable=True))
 
         cls.company = cls.env.company
+        cls.draft_state = cls.env["ir.model.fields.selection"].search(
+            [
+                ("field_id.model", "=", "repair.order"),
+                ("field_id.name", "=", "state"),
+                ("value", "=", "draft"),
+            ],
+            limit=1,
+        )
+        cls.company.write(
+            {
+                "add_grouped_repair_state_ids": [
+                    Command.set(cls.draft_state.ids),
+                ],
+            }
+        )
         cls.partner = cls.env["res.partner"].create({"name": "Test Customer"})
         cls.another_partner = cls.env["res.partner"].create(
             {"name": "Another Customer"}
@@ -664,119 +680,118 @@ class TestRepairOrderGroup(TransactionCase):
     #  Tests for task 5417: configurable "Add Grouped Repair" visibility  #
     # ------------------------------------------------------------------ #
 
-    def _set_allowed_states(self, **state_flags):
-        """Helper: set config_parameter for each state via ir.config_parameter.
+    def _set_allowed_states(self, *state_codes):
+        """Configure states where Add Grouped Repair is allowed."""
+        states = self.env["ir.model.fields.selection"].search(
+            [
+                ("field_id.model", "=", "repair.order"),
+                ("field_id.name", "=", "state"),
+                ("value", "in", list(state_codes)),
+            ]
+        )
+        self.company.write(
+            {
+                "add_grouped_repair_state_ids": [
+                    Command.set(states.ids),
+                ],
+            }
+        )
 
-        Pass state=True/False keyword arguments, e.g.:
-            self._set_allowed_states(draft=True, confirmed=False)
-        Unspecified states default to False.
-        """
-        from ..const import ADD_GROUPED_REPAIR_STATE_PARAMS
-
-        ICP = self.env["ir.config_parameter"].sudo()
-        for state, param in ADD_GROUPED_REPAIR_STATE_PARAMS.items():
-            ICP.set_param(param, str(state_flags.get(state, False)))
-
-    def test_22_button_visible_in_allowed_state_no_so(self):
-        """Button is visible when state is allowed and no SO exists."""
-        self._set_allowed_states(draft=True)
-        repair = self.env["repair.order"].create(
+    def _create_repair(self):
+        """Create a draft repair order with the default test partner."""
+        return self.env["repair.order"].create(
             {
                 "partner_id": self.partner.id,
+                "product_id": self.product.id,
                 "picking_type_id": self.picking_type.id,
             }
         )
+
+    def test_22_add_grouped_repair_visible_in_default_draft_state(self):
+        """Button is visible in draft state with default configuration."""
+        repair = self._create_repair()
+
         self.assertEqual(repair.state, "draft")
         self.assertTrue(repair.show_add_grouped_repair)
         self.assertTrue(repair._can_add_grouped_repair())
 
-    def test_23_button_hidden_in_disallowed_state(self):
-        """Button is hidden when current state is not in allowed list."""
-        self._set_allowed_states(draft=True)
-        repair = self.env["repair.order"].create(
-            {
-                "partner_id": self.partner.id,
-                "picking_type_id": self.picking_type.id,
-            }
-        )
+    def test_23_add_grouped_repair_hidden_in_disallowed_state(self):
+        """Button is hidden when current repair state is not configured."""
+        self._set_allowed_states("draft")
+
+        repair = self._create_repair()
         repair._action_repair_confirm()
-        # state is now 'confirmed', not in allowed list
+
+        self.assertEqual(repair.state, "confirmed")
         self.assertFalse(repair.show_add_grouped_repair)
         self.assertFalse(repair._can_add_grouped_repair())
 
-    def test_24_button_hidden_when_so_confirmed(self):
-        """Button is hidden regardless of state when SO is confirmed."""
-        self._set_allowed_states(draft=True, confirmed=True, under_repair=True)
-        repair = self.env["repair.order"].create(
-            {
-                "partner_id": self.partner.id,
-                "picking_type_id": self.picking_type.id,
-            }
-        )
+    def test_24_add_grouped_repair_hidden_when_sale_order_confirmed(self):
+        """Confirmed sale order blocks adding grouped repairs."""
+        self._set_allowed_states("draft", "confirmed", "under_repair")
+
+        repair = self._create_repair()
         sale_order = self.env["sale.order"].create({"partner_id": self.partner.id})
-        sale_order.action_confirm()  # state -> 'sale'
-        repair.write({"sale_order_id": sale_order.id})
+        sale_order.action_confirm()
+        repair.sale_order_id = sale_order
+
+        self.assertEqual(sale_order.state, "sale")
         self.assertFalse(repair.show_add_grouped_repair)
         self.assertFalse(repair._can_add_grouped_repair())
 
-    def test_25_button_hidden_when_so_cancelled(self):
-        """Button is hidden when the related SO is cancelled."""
-        self._set_allowed_states(draft=True, confirmed=True, under_repair=True)
-        repair = self.env["repair.order"].create(
-            {
-                "partner_id": self.partner.id,
-                "picking_type_id": self.picking_type.id,
-            }
-        )
+    def test_25_add_grouped_repair_hidden_when_sale_order_cancelled(self):
+        """Cancelled sale order blocks adding grouped repairs."""
+        self._set_allowed_states("draft", "confirmed", "under_repair")
+
+        repair = self._create_repair()
         sale_order = self.env["sale.order"].create({"partner_id": self.partner.id})
-        sale_order.action_cancel()  # state -> 'cancel'
-        repair.write({"sale_order_id": sale_order.id})
+        sale_order.action_cancel()
+        repair.sale_order_id = sale_order
+
+        self.assertEqual(sale_order.state, "cancel")
         self.assertFalse(repair.show_add_grouped_repair)
         self.assertFalse(repair._can_add_grouped_repair())
 
-    def test_26_button_hidden_when_setting_empty(self):
-        """When no states are configured button is hidden everywhere."""
-        self._set_allowed_states()  # all False -> deny all
-        repair = self.env["repair.order"].create(
-            {
-                "partner_id": self.partner.id,
-                "picking_type_id": self.picking_type.id,
-            }
-        )
+    def test_26_add_grouped_repair_hidden_when_no_state_is_allowed(self):
+        """Button is hidden when all state settings are disabled."""
+        self._set_allowed_states()
+
+        repair = self._create_repair()
+
         self.assertFalse(repair.show_add_grouped_repair)
         self.assertFalse(repair._can_add_grouped_repair())
 
-    def test_27_button_visible_multiple_allowed_states(self):
-        """Button is visible when current state is one of several allowed."""
-        self._set_allowed_states(draft=True, confirmed=True)
-        repair = self.env["repair.order"].create(
-            {
-                "partner_id": self.partner.id,
-                "picking_type_id": self.picking_type.id,
-            }
-        )
+    def test_27_add_grouped_repair_visible_in_confirmed_state_when_allowed(self):
+        """Button is visible in confirmed state when it is configured."""
+        self._set_allowed_states("draft", "confirmed")
+
+        repair = self._create_repair()
         repair._action_repair_confirm()
+
         self.assertEqual(repair.state, "confirmed")
         self.assertTrue(repair.show_add_grouped_repair)
         self.assertTrue(repair._can_add_grouped_repair())
 
-    def test_28_action_raises_when_not_allowed(self):
-        """action_add_another_repair raises UserError when state is not allowed."""
-        self._set_allowed_states()  # deny all
-        repair = self.env["repair.order"].create(
-            {
-                "partner_id": self.partner.id,
-                "picking_type_id": self.picking_type.id,
-            }
-        )
+    def test_28_add_grouped_repair_action_raises_when_not_allowed(self):
+        """Backend guard prevents adding grouped repairs when not allowed."""
+        self._set_allowed_states()
+
+        repair = self._create_repair()
+
         with self.assertRaises(UserError):
             repair.action_add_another_repair()
 
-    def test_29_default_state_draft_enabled(self):
-        """After installation, draft state is enabled by default via field default."""
-        from ..const import ADD_GROUPED_REPAIR_STATE_PARAMS
+        self.assertFalse(repair.show_add_grouped_repair)
+        self.assertFalse(repair._can_add_grouped_repair())
 
-        ICP = self.env["ir.config_parameter"].sudo()
-        draft_param = ADD_GROUPED_REPAIR_STATE_PARAMS["draft"]
-        val = ICP.get_param(draft_param, False)
-        self.assertTrue(val)
+    def test_29_add_grouped_repair_action_creates_repair_when_allowed(self):
+        """Backend action creates a grouped repair when rules allow it."""
+        self._set_allowed_states("draft")
+
+        repair = self._create_repair()
+        action = repair.action_add_another_repair()
+        new_repair = self.env["repair.order"].browse(action["res_id"])
+
+        self.assertTrue(repair.group_id)
+        self.assertEqual(new_repair.group_id, repair.group_id)
+        self.assertEqual(new_repair.partner_id, repair.partner_id)
