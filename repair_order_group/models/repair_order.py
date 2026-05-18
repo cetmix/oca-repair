@@ -268,6 +268,9 @@ class RepairOrder(models.Model):
 
             # Create a separate SO per warehouse ID
             for warehouse_id, repairs in repairs_by_warehouse.items():
+                if repairs._link_to_existing_group_sale_order():
+                    continue
+
                 so_vals_list.append(
                     {
                         "company_id": _group.company_id.id,
@@ -290,3 +293,32 @@ class RepairOrder(models.Model):
 
         # Return standard action - it will find all SOs linked to repairs
         return self.action_view_sale_order()
+
+    def _link_to_existing_group_sale_order(self):
+        """Link repairs without SO to the existing open group quotation."""
+        sale_orders = self.sale_order_id.filtered(
+            lambda so: so.state not in ("sale", "cancel")
+        )
+        if not sale_orders:
+            return False
+
+        if len(sale_orders) > 1:
+            ref_str = "\n".join(self.filtered("sale_order_id").mapped("name"))
+            raise UserError(
+                self.env._(
+                    "Several open sale orders are already linked to repair "
+                    "orders from the same repair group and warehouse.\n"
+                    "Concerned repair order(s):\n%(ref_str)s",
+                    ref_str=ref_str,
+                )
+            )
+
+        repairs_to_add = self.filtered(lambda repair: not repair.sale_order_id)
+        if repairs_to_add:
+            sale_orders.write(
+                {"repair_order_ids": [(4, repair.id) for repair in repairs_to_add]}
+            )
+            repairs_to_add.move_ids._create_repair_sale_order_line()
+            repairs_to_add._post_create_grouped_hook()
+
+        return True
