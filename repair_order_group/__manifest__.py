@@ -11,12 +11,15 @@
     "website": "https://github.com/OCA/repair",
     "depends": [
         "repair",
+        "base_repair_config",
     ],
     "data": [
+        "data/res_company_data.xml",
         "data/repair_order_group_data.xml",
         "security/ir.model.access.csv",
         "views/repair_order_group_views.xml",
         "views/repair_order_views.xml",
+        "views/res_config_settings_views.xml",
     ],
     "demo": [
         "demo/repair_order_group_demo.xml",
