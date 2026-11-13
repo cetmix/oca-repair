@@ -1014,3 +1014,20 @@ class TestRepairOrderGroup(TransactionCase):
             "Non-draft grouped repair should not remain in a repair group "
             "when duplicated.",
         )
+
+    def test_39_add_grouped_repair_button_uses_visibility_flag_in_form_view(self):
+        """Form view binds Add Grouped Repair visibility to the computed flag."""
+        view = self.env.ref("repair_order_group.view_repair_order_form_inherit_group")
+        self.assertIn('name="action_add_another_repair"', view.arch_db)
+        self.assertIn('invisible="not show_add_grouped_repair"', view.arch_db)
+
+    def test_40_add_grouped_repair_setting_is_loaded(self):
+        """Repair settings expose the states where Add Grouped Repair is available."""
+        view = self.env.ref(
+            "repair_order_group.res_config_settings_view_form_inherit_repair_order_group"
+        )
+        self.assertIn("add_grouped_repair_state_ids", view.arch_db)
+        self.assertEqual(
+            view.inherit_id,
+            self.env.ref("base_repair_config.res_config_settings_view_form"),
+        )
