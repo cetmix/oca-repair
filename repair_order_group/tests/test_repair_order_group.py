@@ -1014,3 +1014,14 @@ class TestRepairOrderGroup(TransactionCase):
             "Non-draft grouped repair should not remain in a repair group "
             "when duplicated.",
         )
+
+    def test_39_add_grouped_repair_setting_is_loaded(self):
+        """Repair settings expose the states where Add Grouped Repair is available."""
+        view = self.env.ref(
+            "repair_order_group.res_config_settings_view_form_inherit_repair_order_group"
+        )
+        self.assertIn("add_grouped_repair_state_ids", view.arch_db)
+        self.assertEqual(
+            view.inherit_id,
+            self.env.ref("base_repair_config.res_config_settings_view_form"),
+        )
