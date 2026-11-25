@@ -193,6 +193,52 @@ class TestRepairOrderGroup(TransactionCase):
         self.assertEqual(repair1.state, "cancel")
         self.assertEqual(repair2.state, "cancel")
 
+    def test_41_unlink_grouped_duplicate_keeps_siblings(self):
+        """Unlinking one grouped draft repair does not cancel siblings."""
+        group = self.env["repair.order.group"].create(
+            {
+                "partner_id": self.partner.id,
+            }
+        )
+        repair1 = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+                "product_id": self.product.id,
+                "group_id": group.id,
+            }
+        )
+        repair2 = self.env["repair.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "picking_type_id": self.picking_type.id,
+                "product_id": self.product.id,
+                "group_id": group.id,
+            }
+        )
+
+        repair1.action_create_sale_order()
+        sale_order = repair1.sale_order_id
+        self.assertEqual(repair2.sale_order_id, sale_order)
+
+        duplicate = repair1.copy()
+        self.assertEqual(duplicate.group_id, group)
+        self.assertFalse(duplicate.sale_order_id)
+
+        duplicate.unlink()
+
+        repair1.invalidate_recordset()
+        repair2.invalidate_recordset()
+        sale_order.invalidate_recordset()
+
+        self.assertFalse(duplicate.exists())
+        self.assertEqual(repair1.state, "draft")
+        self.assertEqual(repair2.state, "draft")
+        self.assertEqual(repair1.sale_order_id, sale_order)
+        self.assertEqual(repair2.sale_order_id, sale_order)
+        self.assertIn(repair1, sale_order.repair_order_ids)
+        self.assertIn(repair2, sale_order.repair_order_ids)
+
     def test_06_group_sale_order_creation(self):
         """Test creating sale order for entire group."""
         group = self.env["repair.order.group"].create(

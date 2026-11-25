@@ -174,6 +174,19 @@ class RepairOrder(models.Model):
         # Single call to original method to preserve full Odoo workflow
         return super(RepairOrder, all_repairs)._action_repair_confirm()
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_confirmed(self):
+        """Cancel only repairs being deleted, not other group members.
+
+        Core repair cancels the record being removed before unlink. This module
+        must not cascade that cancel to siblings in the same repair group.
+        """
+        repairs_to_cancel = self.filtered(lambda ro: ro.state != "cancel")
+        if repairs_to_cancel:
+            repairs_to_cancel.with_context(
+                skip_group_cancel=True
+            ).action_repair_cancel()
+
     def action_repair_cancel(self):
         """Cancel repairs and cascade cancellation to other group members.
 
